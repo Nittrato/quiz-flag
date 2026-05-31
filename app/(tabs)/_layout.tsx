@@ -1,14 +1,13 @@
 import { Tabs } from 'expo-router';
-import NavBar from '../../template/NavBar';
 
 export default function TabsLayout() {
 	return (
 		<Tabs
-			tabBar={props => <NavBar {...props} />}
 			screenOptions={{
 				headerShown: false,
+				tabBarStyle: { display: 'none' },
 				animation: 'shift',
-				sceneStyle: { backgroundColor: '#111111' },
+				sceneStyle: { backgroundColor: '#100e14' },
 			}}
 		>
 			<Tabs.Screen

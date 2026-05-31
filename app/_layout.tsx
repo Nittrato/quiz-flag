@@ -12,8 +12,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
 	const [loaded, error] = useFonts({
-		Bus: require("../assets/fonts/Bus700.ttf"),
-		Ios: require("../assets/fonts/SF-Pro.ttf")
+		Bus: require('../assets/fonts/Bus700.ttf'),
+		Ios: require('../assets/fonts/SF-Pro.ttf'),
 	});
 
 	useEffect(() => {
@@ -28,17 +28,20 @@ export default function RootLayout() {
 
 	return (
 		<SafeAreaProvider
-			style={{ flex: 1, backgroundColor: '#111111', paddingTop: Constants.statusBarHeight }}
+			style={{
+				flex: 1,
+				backgroundColor: '#100e14',
+				paddingTop: Constants.statusBarHeight,
+			}}
 		>
 			<StatusBar />
 			<Stack
 				screenOptions={{
 					headerShown: false,
-					contentStyle: { backgroundColor: '#111111' },
+					contentStyle: { backgroundColor: '#100e14' },
 					animation: 'fade_from_bottom',
 				}}
 			/>
 		</SafeAreaProvider>
 	);
 }
-

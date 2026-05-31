@@ -3,9 +3,13 @@
 @tailwind utilities;
 
 .boton {
-  @apply rounded-full h-alto w-ancho items-center justify-center border border-trans;
+	@apply rounded-full h-alto w-ancho items-center justify-center border border-trans;
 }
 
-.boton2{
-  @apply bg-trans w-[3rem] h-[3rem] border border-trans rounded-[1.2rem] items-center justify-center;
+.boton2 {
+	@apply bg-trans w-[3rem] h-[3rem] border border-trans rounded-[1.2rem] items-center justify-center;
+}
+
+.card {
+	@apply bg-card border border-border rounded-rounded2;
 }

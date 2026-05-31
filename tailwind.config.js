@@ -4,20 +4,20 @@ module.exports = {
 		'./App.{js,jsx,ts,tsx}',
 		'./components/**/*.{js,jsx,ts,tsx}',
 		'./app/**/*.{js,jsx,ts,tsx}',
-		'./screens/**/*.{js,jsx,ts,tsx}',
+		'./template/**/*.{js,jsx,ts,tsx}',
 	],
 	presets: [require('nativewind/preset')],
 	theme: {
 		extend: {
 			colors: {
 				/* Colores de fondo */
-				fondo: '#111111',
-				card: '#1a1a1a',
-				border: '#252525',
+				fondo: '#100e14',
+				card: '#19151f',
+				border: '#27222e',
 				/* Colores de botones y textos */
-				color: '#245ee2',
+				color: '#a1ec3c',
 				primario: '#FFFFFF',
-				segundario: '#777777',
+				segundario: '#c6d0b6',
 				/* Colores transparentes */
 				trans: '#ffffff10',
 				trans2: '#ffffff30',
@@ -47,9 +47,9 @@ module.exports = {
 			},
 			fontSize: {
 				// es un titulo grande
-				h1: '3rem',
+				h1: '2.5rem',
 				// es un titulo mediano
-				h2: '1.8rem',
+				h2: '1.5rem',
 				// es un subtitulo
 				h3: '1.2rem',
 				// es un texto normal

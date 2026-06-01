@@ -55,7 +55,7 @@ module.exports = {
 				// es un texto normal
 				h4: '1.2rem',
 				// es un texto pequeño
-				base: '0.8rem',
+				base: '0.9rem',
 			},
 		},
 	},

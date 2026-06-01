@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import Texto from '../../template/Texto';
 import { Play, Map1, Star1, Clock } from 'iconsax-react-nativejs';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { ScaleButton } from '../../template/AnimatedElements';
 import Niveles from '../../components/Niveles';
+import { continentes } from '../../lib/data';
 
 export default function Home() {
+	const router = useRouter();
+
 	return (
 		<ScrollView
 			className="flex-1"
@@ -15,11 +18,13 @@ export default function Home() {
 		>
 			{/* partida rapida */}
 			<ScaleButton className="flex flex-col mt-10 h-60 bg-card border p-7 justify-between items-end border-border rounded-rounded2 mx-screen">
-				<View className="bg-color rounded-rounded px-4 py-1">
-					<Texto className="text-card text-base">60 sec</Texto>
+				<View className="bg-color rounded-rounded px-4 py-3">
+					<Texto className="text-card text-base font-bold">
+						60 sec
+					</Texto>
 				</View>
 				<View className="flex flex-row justify-between items-end w-full">
-					<View className="flex flex-col w-3/4">
+					<View className="flex flex-col w-3/4 gap-1">
 						<Texto className="text-h1 text-color font-pixel">
 							PARTIDA RAPIDA
 						</Texto>
@@ -38,36 +43,34 @@ export default function Home() {
 			<View className="mx-screen gap-5 mt-8">
 				<Texto className="text-segundario text-h4">Continentes</Texto>
 				<View className="flex flex-row flex-wrap justify-between gap-y-5">
-					<TouchableOpacity className="card flex p-6 flex-col gap-3 w-[48%] items-start">
-						<View className="bg-blue-600/20 rounded-3xl p-4">
-							<Map1 size={22} color="#5b9dee" />
-						</View>
-						<Texto className="text-primario text-h3">Europa</Texto>
-					</TouchableOpacity>
-					<TouchableOpacity className="card flex p-6 flex-col gap-3 w-[48%] items-start">
-						<View className="bg-green-700/20 rounded-3xl p-4">
-							<Map1 size={22} color="#42c673" />
-						</View>
-						<Texto className="text-primario text-h3">America</Texto>
-					</TouchableOpacity>
-					<TouchableOpacity className="card flex p-6 flex-col gap-3 w-[48%] items-start">
-						<View className="bg-red-500/20  rounded-3xl p-4">
-							<Map1 size={22} color="#e56b6c" />
-						</View>
-						<Texto className="text-primario text-h3">Asia</Texto>
-					</TouchableOpacity>
-					<TouchableOpacity className="card flex p-6 flex-col gap-3 w-[48%] items-start">
-						<View className="bg-orange-600/20  rounded-3xl p-4">
-							<Map1 size={22} color="#eb8938" />
-						</View>
-						<Texto className="text-primario text-h3">Africa</Texto>
-					</TouchableOpacity>
-					<TouchableOpacity className="card flex p-6 flex-row gap-4 w-full items-center">
-						<View className="bg-indigo-500/20  rounded-3xl p-4">
-							<Map1 size={22} color="#968ddc" />
-						</View>
-						<Texto className="text-primario text-h3">Oceania</Texto>
-					</TouchableOpacity>
+					{continentes.map((continente, index) => {
+						const colors = [
+							{ bg: 'bg-blue-600/20', icon: '#5b9dee' },
+							{ bg: 'bg-green-700/20', icon: '#42c673' },
+							{ bg: 'bg-red-500/20', icon: '#e56b6c' },
+							{ bg: 'bg-orange-600/20', icon: '#eb8938' },
+							{ bg: 'bg-indigo-500/20', icon: '#968ddc' },
+						];
+						const isLast = index === continentes.length - 1;
+						const { bg, icon } = colors[index] ?? colors[0];
+
+						return (
+							<TouchableOpacity
+								key={continente.id}
+								className={`card flex p-6 gap-3 items-start ${isLast ? 'flex-row w-full gap-4 items-center' : 'flex-col w-[48%]'}`}
+								onPress={() =>
+									router.push(`/continente/${continente.id}`)
+								}
+							>
+								<View className={`${bg} rounded-3xl p-4`}>
+									<Map1 size={22} color={icon} />
+								</View>
+								<Texto className="text-primario text-h3">
+									{continente.name}
+								</Texto>
+							</TouchableOpacity>
+						);
+					})}
 				</View>
 			</View>
 

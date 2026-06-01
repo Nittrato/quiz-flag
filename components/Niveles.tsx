@@ -4,13 +4,13 @@ import Texto from '../template/Texto';
 import {
 	Clock,
 	TickCircle,
-	Play,
 	Lock,
 	Smileys,
 	Book1,
 	Flash,
 	Crown,
 	Medal,
+	Record,
 } from 'iconsax-react-nativejs';
 import { ScaleButton } from '../template/AnimatedElements';
 import { niveles } from '../lib/data';
@@ -33,7 +33,7 @@ function IconoEstado({ estado }: { estado: ProgresoEstado }) {
 		return <Clock size={20} color="#19151f" variant="Bold" />;
 	}
 	// incompleto
-	return <Play size={20} color="#19151f" variant="Bold" />;
+	return <Record size={20} color="#19151f" variant="Bold" />;
 }
 
 // convierte los numeros en barra de progreso

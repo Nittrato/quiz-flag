@@ -49,11 +49,11 @@ module.exports = {
 				// es un titulo grande
 				h1: '2.5rem',
 				// es un titulo mediano
-				h2: '1.5rem',
+				h2: '1.8rem',
 				// es un subtitulo
-				h3: '1.2rem',
+				h3: '1.4rem',
 				// es un texto normal
-				h4: '1rem',
+				h4: '1.2rem',
 				// es un texto pequeño
 				base: '0.8rem',
 			},

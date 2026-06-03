@@ -9,9 +9,9 @@ export default function ContinentePage() {
 	const continente = continentes.find(continente => continente.id === id);
 
 	return (
-		<View className="flex h-screen">
+		<View className="flex-1">
 			{/* heroBar */}
-			<View className="flex flex-row p-5 justify-between items-center z-50">
+			<View className="flex flex-row justify-between items-center z-50 p-5">
 				<TouchableOpacity
 					className="bg-card boton"
 					onPress={() => router.back()}
@@ -29,59 +29,59 @@ export default function ContinentePage() {
 				</View>
 			</View>
 
-			{/* presentacion */}
-			<View className="m-screen">
-				<Texto className="text-color text-h4">Pregunta 02/10</Texto>
-				<Texto className="text-primario text-h1">
-					De que pais de {continente.name} es esta bandera?
-				</Texto>
-			</View>
+			<View className="flex-1 flex-col justify-evenly mx-screen">
+				{/* presentacion */}
+				<View className="flex mt-5">
+					<Texto className="text-color text-h4">Pregunta 02/10</Texto>
+					<Texto className="text-primario text-h1">
+						De que pais de {continente.name} es esta bandera?
+					</Texto>
+				</View>
 
-			{/* seleccion de pais */}
-			<View className="flex flex-col mx-screen gap-6">
+				{/* seleccion de pais */}
 				<View className="card">
 					{/* <Image /> */}
 					<View className="w-full h-64"></View>
 				</View>
-				<View className="flex flex-row flex-wrap justify-between gap-y-5">
-					<TouchableOpacity className="bg-card border rounded-rounded2 border-border flex h-32 items-center justify-center w-[48%]">
+
+				{/* cuadricula */}
+				<View className="flex flex-row flex-wrap gap-4">
+					<TouchableOpacity className="bg-card border rounded-rounded2 border-border h-28 items-center justify-center w-[48%]">
 						<Texto className="text-primario text-h3">
 							Argentina
 						</Texto>
 					</TouchableOpacity>
-					<TouchableOpacity className="bg-card border rounded-rounded2 border-border flex h-32 items-center justify-center w-[48%]">
+					<TouchableOpacity className="bg-card border rounded-rounded2 border-border h-28 items-center justify-center w-[48%]">
 						<Texto className="text-primario text-h3">
 							Argentina
 						</Texto>
 					</TouchableOpacity>
-					<TouchableOpacity className="bg-card border rounded-rounded2 border-border flex h-32 items-center justify-center w-[48%]">
+					<TouchableOpacity className="bg-card border rounded-rounded2 border-border h-28 items-center justify-center w-[48%]">
 						<Texto className="text-primario text-h3">
 							Argentina
 						</Texto>
 					</TouchableOpacity>
-					<TouchableOpacity className="bg-card border rounded-rounded2 border-border flex h-32 items-center justify-center w-[48%]">
+					<TouchableOpacity className="bg-card border rounded-rounded2 border-border h-28 items-center justify-center w-[48%]">
 						<Texto className="text-primario text-h3">
 							Argentina
 						</Texto>
 					</TouchableOpacity>
 				</View>
-			</View>
 
-			{/* racha y boton de siguiente */}
-			<View className="flex flex-col mx-screen mt-auto py-screen gap-5">
+				{/* racha */}
 				<View className="bg-card border border-border p-screen rounded-rounded2 flex flex-row gap-2 justify-center items-center mx-auto">
 					<Star1 size="20" color="white" variant="Bold" />
 					<Texto className="text-primario text-base">
 						x6 de Racha
 					</Texto>
 				</View>
-				{/* <ScaleButton></ScaleButton> */}
-				<TouchableOpacity className="bg-color rounded-rounded2 flex-row gap-4 p-screen justify-center items-center flex">
+				{/* Boton siguiente */}
+				<ScaleButton className="bg-color rounded-rounded2 flex-row gap-4 p-screen justify-center items-center flex">
 					<Texto className="text-fondo text-h2 font-pixel">
 						SIGUIENTE
 					</Texto>
 					<ArrowRight size={28} color="black" />
-				</TouchableOpacity>
+				</ScaleButton>
 			</View>
 		</View>
 	);

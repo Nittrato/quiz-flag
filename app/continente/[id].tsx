@@ -46,10 +46,8 @@ export default function ContinentePage() {
 
 	const contadorScale = useRef(new Animated.Value(1)).current;
 	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
 	const totalPreguntas = 10;
 
-	// Arranca el timer cuando carga
 	useEffect(() => {
 		if (!cargando) {
 			timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
@@ -126,12 +124,22 @@ export default function ContinentePage() {
 	const progreso = (indice / totalPreguntas) * 100;
 	const enRacha = racha >= 3;
 
+	const getOpcionClasses = (opcion: Pais) => {
+		const esCorrecta = opcion.nombre === paisActual?.nombre;
+		const esSeleccionada = opcion.nombre === seleccionado;
+		if (seleccionado && esCorrecta)
+			return 'bg-green-500/20 border-green-500';
+		if (seleccionado && esSeleccionada)
+			return 'bg-red-500/20 border-red-500';
+		return 'bg-card border-border';
+	};
+
 	return (
 		<View className="flex-1">
 			{/* Header */}
 			<View className="flex-row justify-between items-center p-5">
 				<TouchableOpacity
-					className="bg-card p-3 rounded-full"
+					className="card w-ancho h-alto justify-center items-center"
 					onPress={() => router.back()}
 				>
 					<Add
@@ -142,7 +150,7 @@ export default function ContinentePage() {
 				</TouchableOpacity>
 
 				{/* Barra de progreso */}
-				<View className="h-2 bg-border rounded-full overflow-hidden flex-1 mx-5">
+				<View className="flex-1 mx-5 h-2 bg-border rounded-full overflow-hidden">
 					<View
 						style={{ width: `${progreso}%` }}
 						className="h-full bg-color rounded-full"
@@ -150,9 +158,9 @@ export default function ContinentePage() {
 				</View>
 
 				{/* Timer */}
-				<View className="flex-row gap-1.5 bg-card border border-border px-4 py-3 rounded-full items-center">
+				<View className="flex-row gap-1 bg-card border border-border px-4 py-3 rounded-full items-center">
 					<Clock size={18} color="white" />
-					<Texto className="text-white text-h4">
+					<Texto className="text-primario text-h4">
 						{formatTime(timer)}
 					</Texto>
 				</View>
@@ -165,71 +173,39 @@ export default function ContinentePage() {
 						Pregunta {String(indice + 1).padStart(2, '0')}/
 						{totalPreguntas}
 					</Texto>
-					<Texto className="text-primario text-h1">
+					<Texto className="text-primario text-h1 font-pixel uppercase">
 						¿De qué país de {continente?.name} es esta bandera?
 					</Texto>
 				</View>
 
 				{/* Bandera */}
-				<View
-					className="card items-center justify-center p-4"
-					style={{ height: 230 }}
-				>
+				<View className="card items-center justify-center p-4 h-72">
 					{cargando || !paisActual ? (
 						<ActivityIndicator size="large" color="#a1ec3c" />
 					) : (
 						<Image
 							source={{ uri: paisActual.bandera }}
-							style={{
-								width: '100%',
-								height: '100%',
-							}}
+							className="w-full h-full rounded-rounded"
 							resizeMode="cover"
-							className="rounded-3xl border-4 border-border"
 						/>
 					)}
 				</View>
 
 				{/* Opciones */}
-				<View className="flex-row flex-wrap gap-4 justify-between">
+				<View className="flex-row flex-wrap gap-3 justify-between">
 					{opciones.map(opcion => {
 						const esCorrecta = opcion.nombre === paisActual?.nombre;
 						const esSeleccionada = opcion.nombre === seleccionado;
-
-						let bg = '#19151f';
-						let borderColor = '#27222e';
-						if (seleccionado) {
-							if (esCorrecta) {
-								bg = 'rgba(34,197,94,0.2)';
-								borderColor = '#22c55e';
-							} else if (esSeleccionada) {
-								bg = 'rgba(239,68,68,0.2)';
-								borderColor = '#ef4444';
-							}
-						}
-
 						return (
 							<TouchableOpacity
 								key={opcion.nombre}
-								style={{
-									backgroundColor: bg,
-									borderWidth: 1,
-									borderColor,
-									borderRadius: 22,
-									height: 100,
-									width: '48%',
-									opacity:
-										seleccionado &&
-										!esCorrecta &&
-										!esSeleccionada
-											? 0.4
-											: 1,
-								}}
-								className=" items-center justify-center"
+								className={`border rounded-rounded2 w-[48%] h-28 p-4 items-center justify-center
+									${getOpcionClasses(opcion)}
+									${seleccionado && !esCorrecta && !esSeleccionada ? 'opacity-40' : ''}`}
 								onPress={() => handleSeleccionar(opcion.nombre)}
 								disabled={!!seleccionado}
 							>
-								<Texto className="text-primario text-h3 text-center px-2">
+								<Texto className="text-primario text-h4 text-center px-2">
 									{opcion.nombre}
 								</Texto>
 							</TouchableOpacity>
@@ -243,43 +219,18 @@ export default function ContinentePage() {
 					className="self-center"
 				>
 					{enRacha ? (
-						<View
-							className="px-7 py-3.5 rounded-2xl flex-row items-center gap-5"
-							style={{
-								backgroundColor: 'rgba(161,236,60,0.15)',
-								borderWidth: 1,
-								borderColor: '#a1ec3c',
-							}}
-						>
-							<Texto
-								style={{
-									color: '#a1ec3c',
-									fontSize: 18,
-									fontFamily: 'Bus',
-								}}
-							>
+						<View className="px-7 py-3 rounded-rounded2 flex-row items-center border border-color bg-color/15">
+							<Texto className="text-color text-h3 font-pixel">
 								🔥 RACHA x{racha}
 							</Texto>
 						</View>
 					) : (
-						<View className="bg-card border border-border px-7 py-3.5 rounded-2xl flex-row items-center gap-5">
-							<Texto
-								style={{
-									color: '#a1ec3c',
-									fontSize: 18,
-									fontFamily: 'Bus',
-								}}
-							>
+						<View className="bg-card border border-border px-7 py-3 rounded-rounded2 flex-row items-center gap-5">
+							<Texto className="text-color text-h3 font-pixel">
 								x{correctas}
 							</Texto>
 							<View className="w-px h-6 bg-border" />
-							<Texto
-								style={{
-									color: '#ef4444',
-									fontSize: 18,
-									fontFamily: 'Bus',
-								}}
-							>
+							<Texto className="text-red-500 text-h3 font-pixel">
 								x{errores}
 							</Texto>
 						</View>
@@ -293,17 +244,13 @@ export default function ContinentePage() {
 					disabled={!seleccionado}
 				>
 					<Texto
-						style={{
-							color: seleccionado ? '#100e14' : 'white',
-							fontSize: 24,
-							fontFamily: 'Bus',
-						}}
+						className={`text-h2 font-pixel ${seleccionado ? 'text-fondo' : 'text-primario'}`}
 					>
 						SIGUIENTE
 					</Texto>
 					<ArrowRight
 						size={28}
-						color={seleccionado ? '#100e14' : 'gray'}
+						color={seleccionado ? '#100e14' : 'white'}
 					/>
 				</TouchableOpacity>
 			</View>

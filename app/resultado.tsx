@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Animated, Easing } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Texto from '../template/Texto';
 import { ScaleButton } from '../template/AnimatedElements';
 import { Add, Star1, Clock, Chart } from 'iconsax-react-nativejs';
+import CirculoProgreso from '../components/CirculoProgreso';
 
-// ── Utilidades ─────────────────────────────────────────────────
 function formatTime(seg: number) {
 	const m = Math.floor(seg / 60)
 		.toString()
@@ -14,127 +14,6 @@ function formatTime(seg: number) {
 	return `${m}:${s}`;
 }
 
-// ── Círculo de progreso ─────────────────────────────────────────
-const SIZE = 200;
-const THICKNESS = 14;
-const HALF = SIZE / 2;
-
-function CirculoProgreso({ porcentaje }: { porcentaje: number }) {
-	const [angulo, setAngulo] = useState(0);
-	const anim = useRef(new Animated.Value(0)).current;
-
-	useEffect(() => {
-		Animated.timing(anim, {
-			toValue: porcentaje,
-			duration: 1200,
-			delay: 300,
-			easing: Easing.out(Easing.cubic),
-			useNativeDriver: false,
-		}).start();
-		const id = anim.addListener(({ value }) => setAngulo(value * 3.6));
-		return () => anim.removeListener(id);
-	}, []);
-
-	const mostrarDerecha = angulo > 180;
-	const rot1 = Math.min(angulo, 180) - 180;
-	const rot2 = mostrarDerecha ? angulo - 360 : -180;
-
-	return (
-		<View
-			style={{
-				width: SIZE,
-				height: SIZE,
-				alignItems: 'center',
-				justifyContent: 'center',
-			}}
-		>
-			{/* Pista gris */}
-			<View
-				style={{
-					position: 'absolute',
-					width: SIZE,
-					height: SIZE,
-					borderRadius: HALF,
-					borderWidth: THICKNESS,
-					borderColor: '#27222e',
-				}}
-			/>
-			{/* Semicírculo izquierdo */}
-			{angulo > 0 && (
-				<View
-					style={{
-						position: 'absolute',
-						width: HALF,
-						height: SIZE,
-						left: 0,
-						overflow: 'hidden',
-					}}
-				>
-					<View
-						style={{
-							position: 'absolute',
-							width: SIZE,
-							height: SIZE,
-							borderRadius: HALF,
-							borderWidth: THICKNESS,
-							borderColor: '#a1ec3c',
-							transform: [{ rotate: `${rot1}deg` }],
-						}}
-					/>
-				</View>
-			)}
-			{/* Semicírculo derecho */}
-			{mostrarDerecha && (
-				<View
-					style={{
-						position: 'absolute',
-						width: HALF,
-						height: SIZE,
-						right: 0,
-						overflow: 'hidden',
-					}}
-				>
-					<View
-						style={{
-							position: 'absolute',
-							right: 0,
-							width: SIZE,
-							height: SIZE,
-							borderRadius: HALF,
-							borderWidth: THICKNESS,
-							borderColor: '#a1ec3c',
-							transform: [{ rotate: `${rot2}deg` }],
-						}}
-					/>
-				</View>
-			)}
-			{/* Número central */}
-			<NumeroAnimado anim={anim} />
-		</View>
-	);
-}
-
-function NumeroAnimado({ anim }: { anim: Animated.Value }) {
-	const [num, setNum] = useState(0);
-	useEffect(() => {
-		const id = anim.addListener(({ value }) => setNum(Math.round(value)));
-		return () => anim.removeListener(id);
-	}, []);
-	return (
-		<Texto
-			style={{
-				color: '#a1ec3c',
-				fontSize: 52,
-				fontFamily: 'Bus',
-				letterSpacing: 2,
-			}}
-		>
-			{num}%
-		</Texto>
-	);
-}
-
-// ── Barra animada ───────────────────────────────────────────────
 function BarraProgreso({ valor, color }: { valor: number; color: string }) {
 	const anim = useRef(new Animated.Value(0)).current;
 	useEffect(() => {
@@ -164,7 +43,6 @@ function BarraProgreso({ valor, color }: { valor: number; color: string }) {
 	);
 }
 
-// ── Pantalla ────────────────────────────────────────────────────
 export default function ResultadoPage() {
 	const params = useLocalSearchParams<{
 		correctas: string;
@@ -177,7 +55,6 @@ export default function ResultadoPage() {
 	const correctas = parseInt(params.correctas ?? '0', 10);
 	const total = parseInt(params.total ?? '10', 10);
 	const maxRacha = parseInt(params.maxRacha ?? '0', 10);
-	const continente = params.continente ?? '';
 	const tiempo = parseInt(params.tiempo ?? '0', 10);
 	const porcentaje = Math.round((correctas / total) * 100);
 
@@ -195,7 +72,7 @@ export default function ResultadoPage() {
 			{/* Header */}
 			<View className="flex-row justify-between items-center p-5">
 				<TouchableOpacity
-					className="bg-card p-3 rounded-full"
+					className="w-ancho h-alto justify-center items-center card"
 					onPress={() => router.replace('/')}
 				>
 					<Add
@@ -204,103 +81,60 @@ export default function ResultadoPage() {
 						style={{ transform: [{ rotate: '45deg' }] }}
 					/>
 				</TouchableOpacity>
-				<Texto
-					style={{
-						color: '#a1ec3c',
-						fontSize: 16,
-						fontFamily: 'Bus',
-					}}
-				>
+				<Texto className="text-primario text-h2 font-pixel">
 					RESULTADOS
 				</Texto>
-				<View className="w-12" />
+				<View className="w-ancho" />
 			</View>
 
-			<View className="flex-1 justify-evenly px-5">
+			<View className="flex-1 justify-evenly mx-screen">
 				{/* Círculo */}
 				<View className="items-center">
 					<CirculoProgreso porcentaje={porcentaje} />
-					<Texto className="text-segundario text-h4 mt-4">
-						{continente}
-					</Texto>
 				</View>
 
 				{/* Racha + Tiempo */}
 				<View className="flex-row gap-3">
-					<View className="flex-1 bg-card rounded-3xl p-5 gap-2">
-						<View
-							className="w-11 h-11 rounded-2xl items-center justify-center"
-							style={{ backgroundColor: 'rgba(161,236,60,0.12)' }}
-						>
-							<Star1 size={22} color="#a1ec3c" variant="Bold" />
+					<View className="flex-1 bg-card rounded-rounded2 p-screen gap-2">
+						<View className="w-14 h-14 rounded-rounded items-center justify-center bg-color/10">
+							<Star1 size={20} color="#a1ec3c" variant="Bold" />
 						</View>
-						<Texto
-							style={{
-								color: '#c6d0b6',
-								fontSize: 11,
-								letterSpacing: 2,
-							}}
-						>
-							RACHA MAXIMA
+						<Texto className="text-segundario text-h4">
+							Racha maxima
 						</Texto>
-						<View className="flex-row items-baseline gap-1.5">
-							<Texto
-								style={{
-									color: '#a1ec3c',
-									fontSize: 36,
-									fontFamily: 'Bus',
-								}}
-							>
+						<View className="flex-row items-baseline gap-1">
+							<Texto className="text-color text-h1 font-pixel">
 								{maxRacha}
 							</Texto>
-							<Texto className="text-segundario text-base">
-								MAX
+							<Texto className="text-segundario text-h4">
+								Max
 							</Texto>
 						</View>
 					</View>
 
-					<View className="flex-1 bg-card rounded-3xl p-5 gap-2">
-						<View className="w-11 h-11 rounded-2xl bg-trans items-center justify-center">
-							<Clock size={22} color="white" />
+					<View className="flex-1 bg-card rounded-rounded2 p-screen gap-2">
+						<View className="w-14 h-14 rounded-rounded bg-trans items-center justify-center">
+							<Clock size={20} color="white" />
 						</View>
-						<Texto
-							style={{
-								color: '#c6d0b6',
-								fontSize: 11,
-								letterSpacing: 2,
-							}}
-						>
-							CRONOMETRO
+						<Texto className="text-segundario text-h4">
+							Cronometro
 						</Texto>
-						<Texto
-							style={{
-								color: 'white',
-								fontSize: 30,
-								fontFamily: 'Bus',
-								letterSpacing: 2,
-							}}
-						>
+						<Texto className="text-primario text-h1 font-pixel">
 							{formatTime(tiempo)}
 						</Texto>
 					</View>
 				</View>
 
-				{/* Answer analysis */}
-				<View className="bg-card rounded-3xl p-5 gap-4">
+				{/* Analíticas */}
+				<View className="bg-card rounded-rounded2 p-6 gap-5">
 					<View className="flex-row justify-between items-center">
-						<Texto
-							style={{
-								color: '#c6d0b6',
-								fontSize: 11,
-								letterSpacing: 2,
-							}}
-						>
-							Analiticas:
+						<Texto className="text-segundario text-h4">
+							Analíticas
 						</Texto>
-						<Chart size={18} color="#c6d0b6" />
+						<Chart size={18} color="#c6d0b6" variant="Bold" />
 					</View>
 
-					<View className="gap-1.5">
+					<View className="gap-2">
 						<View className="flex-row justify-between">
 							<View className="flex-row items-center gap-2">
 								<View className="w-2 h-2 rounded-full bg-color" />
@@ -308,13 +142,7 @@ export default function ResultadoPage() {
 									Respuestas correctas
 								</Texto>
 							</View>
-							<Texto
-								style={{
-									color: '#a1ec3c',
-									fontSize: 14,
-									fontFamily: 'Bus',
-								}}
-							>
+							<Texto className="text-color text-base font-pixel">
 								{correctas}
 							</Texto>
 						</View>
@@ -324,7 +152,7 @@ export default function ResultadoPage() {
 						/>
 					</View>
 
-					<View className="gap-1.5">
+					<View className="gap-2">
 						<View className="flex-row justify-between">
 							<View className="flex-row items-center gap-2">
 								<View className="w-2 h-2 rounded-full bg-red-500" />
@@ -332,13 +160,7 @@ export default function ResultadoPage() {
 									Respuestas incorrectas
 								</Texto>
 							</View>
-							<Texto
-								style={{
-									color: '#ef4444',
-									fontSize: 14,
-									fontFamily: 'Bus',
-								}}
-							>
+							<Texto className="text-red-500 text-base font-pixel">
 								{total - correctas}
 							</Texto>
 						</View>
@@ -351,17 +173,10 @@ export default function ResultadoPage() {
 
 				{/* CTA */}
 				<ScaleButton
-					className="bg-color rounded-full py-5 items-center justify-center"
+					className="bg-color rounded-rounded py-5 items-center justify-center"
 					onPress={() => router.replace('/')}
 				>
-					<Texto
-						style={{
-							color: '#100e14',
-							fontSize: 20,
-							fontFamily: 'Bus',
-							letterSpacing: 3,
-						}}
-					>
+					<Texto className="text-fondo text-h2 font-pixel">
 						TERMINAR
 					</Texto>
 				</ScaleButton>

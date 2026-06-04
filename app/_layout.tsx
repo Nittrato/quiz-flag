@@ -6,6 +6,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import '../global.css';
+import { SettingsProvider } from '../lib/settings';
 
 // Prevenir que la splash screen se oculte automáticamente
 SplashScreen.preventAutoHideAsync();
@@ -27,21 +28,23 @@ export default function RootLayout() {
 	}
 
 	return (
-		<SafeAreaProvider
-			style={{
-				flex: 1,
-				backgroundColor: '#100e14',
-				paddingTop: Constants.statusBarHeight,
-			}}
-		>
-			<StatusBar />
-			<Stack
-				screenOptions={{
-					headerShown: false,
-					contentStyle: { backgroundColor: '#100e14' },
-					animation: 'fade_from_bottom',
+		<SettingsProvider>
+			<SafeAreaProvider
+				style={{
+					flex: 1,
+					backgroundColor: '#100e14',
+					paddingTop: Constants.statusBarHeight,
 				}}
-			/>
-		</SafeAreaProvider>
+			>
+				<StatusBar />
+				<Stack
+					screenOptions={{
+						headerShown: false,
+						contentStyle: { backgroundColor: '#100e14' },
+						animation: 'fade_from_bottom',
+					}}
+				/>
+			</SafeAreaProvider>
+		</SettingsProvider>
 	);
 }

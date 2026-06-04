@@ -10,6 +10,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { getTodosLosPaises, Pais } from '../../lib/data';
 import Texto from '../../template/Texto';
 import { Add, Clock } from 'iconsax-react-nativejs';
+import { useSettings } from '../../lib/settings';
 
 const TIEMPO_INICIAL = 60;
 
@@ -23,6 +24,7 @@ function getOpciones(pool: Pais[], correcto: Pais): Pais[] {
 }
 
 export default function RapidaPage() {
+	const { sinIslas } = useSettings();
 	const [pool, setPool] = useState<Pais[]>([]);
 	const [pregunta, setPregunta] = useState<Pais | null>(null);
 	const [opciones, setOpciones] = useState<Pais[]>([]);
@@ -37,7 +39,7 @@ export default function RapidaPage() {
 
 	// Carga todos los países
 	useEffect(() => {
-		getTodosLosPaises()
+		getTodosLosPaises(sinIslas)
 			.then(data => {
 				setPool(data);
 				const primera = shuffle(data)[0];

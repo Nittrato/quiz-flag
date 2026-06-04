@@ -10,6 +10,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { continentes, getPaisesPorContinente, Pais } from '../../lib/data';
 import Texto from '../../template/Texto';
 import { Add, ArrowRight, Clock } from 'iconsax-react-nativejs';
+import { useSettings } from '../../lib/settings';
 
 function shuffle<T>(arr: T[]): T[] {
 	return [...arr].sort(() => Math.random() - 0.5);
@@ -31,6 +32,7 @@ function formatTime(seg: number) {
 export default function ContinentePage() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const continente = continentes.find(c => c.id === id);
+	const { sinIslas } = useSettings();
 
 	const [paises, setPaises] = useState<Pais[]>([]);
 	const [pool, setPool] = useState<Pais[]>([]);
@@ -60,7 +62,7 @@ export default function ContinentePage() {
 	useEffect(() => {
 		if (!continente) return;
 		setCargando(true);
-		getPaisesPorContinente(continente.region)
+		getPaisesPorContinente(continente.region, sinIslas)
 			.then(data => {
 				const mezclados = shuffle(data).slice(0, totalPreguntas);
 				setPool(data);

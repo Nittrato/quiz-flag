@@ -1,14 +1,20 @@
-import { useState } from 'react';
-import { View, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import Texto from '../../template/Texto';
-import { Play, Map1, Star1, Clock } from 'iconsax-react-nativejs';
+import { Play, Map1 } from 'iconsax-react-nativejs';
 import { useRouter } from 'expo-router';
 import { ScaleButton } from '../../template/AnimatedElements';
 import Niveles from '../../components/Niveles';
+import Toggle from '../../components/Toggle';
 import { continentes } from '../../lib/data';
+import { useSettings } from '../../lib/settings';
 
 export default function Home() {
 	const router = useRouter();
+	const { sinIslas, setSinIslas } = useSettings();
+
+	const continentesFiltrados = sinIslas
+		? continentes.filter(c => c.id !== '5')
+		: continentes;
 
 	return (
 		<ScrollView
@@ -46,7 +52,7 @@ export default function Home() {
 			<View className="mx-screen gap-5 mt-8">
 				<Texto className="text-segundario text-h4">Continentes</Texto>
 				<View className="flex flex-row flex-wrap justify-between gap-y-5">
-					{continentes.map((continente, index) => {
+					{continentesFiltrados.map((continente, index) => {
 						const colors = [
 							{ bg: 'bg-blue-600/20', icon: '#5b9dee' },
 							{ bg: 'bg-green-700/20', icon: '#42c673' },
@@ -84,6 +90,20 @@ export default function Home() {
 				</Texto>
 				<View className="flex gap-4 flex-col">
 					<Niveles />
+				</View>
+			</View>
+
+			<View className="mx-screen gap-5 mt-8 bg-color/10 border border-color rounded-rounded2 p-screen">
+				<View className="flex-row justify-between items-center">
+					<View className="flex-1 gap-1">
+						<Texto className="text-primario text-h4">
+							Desactivar islas
+						</Texto>
+						<Texto className="text-segundario text-base">
+							Excluye territorios insulares y países pequeños
+						</Texto>
+					</View>
+					<Toggle value={sinIslas} onChange={setSinIslas} />
 				</View>
 			</View>
 		</ScrollView>

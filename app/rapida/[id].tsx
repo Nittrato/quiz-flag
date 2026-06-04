@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
 	View,
 	TouchableOpacity,
@@ -7,9 +7,9 @@ import {
 	Animated,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { continentes, getTodosLosPaises, Pais } from '../../lib/data';
+import { getTodosLosPaises, Pais } from '../../lib/data';
 import Texto from '../../template/Texto';
-import { Add, ArrowRight, Clock } from 'iconsax-react-nativejs';
+import { Add, Clock } from 'iconsax-react-nativejs';
 
 const TIEMPO_INICIAL = 60;
 
@@ -23,9 +23,6 @@ function getOpciones(pool: Pais[], correcto: Pais): Pais[] {
 }
 
 export default function RapidaPage() {
-	// id no se usa para filtrar continente — la partida rápida es global
-	const { id } = useLocalSearchParams<{ id: string }>();
-
 	const [pool, setPool] = useState<Pais[]>([]);
 	const [pregunta, setPregunta] = useState<Pais | null>(null);
 	const [opciones, setOpciones] = useState<Pais[]>([]);
@@ -88,16 +85,28 @@ export default function RapidaPage() {
 		}).start();
 	};
 
+	const siguientePregunta = (poolActual: Pais[], actual: Pais) => {
+		const nueva = shuffle(
+			poolActual.filter(p => p.nombre !== actual.nombre)
+		)[0];
+		setPregunta(nueva);
+		setOpciones(getOpciones(poolActual, nueva));
+		setSeleccionado(null);
+	};
+
 	const handleSeleccionar = (nombre: string) => {
 		if (seleccionado || !pregunta) return;
 		setSeleccionado(nombre);
 		const esCorrecta = nombre === pregunta.nombre;
 
 		if (esCorrecta) {
-			setCorrectas(c => c + 1);
+			const nuevasCorrectas = correctas + 1;
+			setCorrectas(nuevasCorrectas);
 			animarBoton();
+			// Pausa breve para ver el verde y pasa a la siguiente
+			setTimeout(() => siguientePregunta(pool, pregunta), 600);
 		} else {
-			// Falla → termina la partida después de mostrar la respuesta 1 seg
+			// Falla → muestra el rojo 1 seg y termina
 			if (timerRef.current) clearInterval(timerRef.current);
 			setTimeout(() => {
 				router.replace({
@@ -107,16 +116,6 @@ export default function RapidaPage() {
 			}, 1000);
 		}
 	};
-
-	const handleSiguiente = useCallback(() => {
-		if (!pool.length) return;
-		const nueva = shuffle(
-			pool.filter(p => p.nombre !== pregunta?.nombre)
-		)[0];
-		setPregunta(nueva);
-		setOpciones(getOpciones(pool, nueva));
-		setSeleccionado(null);
-	}, [pool, pregunta]);
 
 	// Colores dinámicos de opciones
 	const getOpcionClases = (opcion: Pais) => {
@@ -233,34 +232,6 @@ export default function RapidaPage() {
 						</Texto>
 					</View>
 				</Animated.View>
-
-				{/* Botón siguiente — solo habilitado si acertó */}
-				<TouchableOpacity
-					className={`rounded-rounded2 flex-row gap-4 py-5 justify-center items-center
-						${seleccionado && seleccionado === pregunta?.nombre ? 'bg-color' : 'bg-card opacity-40'}`}
-					onPress={
-						seleccionado && seleccionado === pregunta?.nombre
-							? handleSiguiente
-							: undefined
-					}
-					disabled={
-						!seleccionado || seleccionado !== pregunta?.nombre
-					}
-				>
-					<Texto
-						className={`text-h2 font-pixel ${seleccionado && seleccionado === pregunta?.nombre ? 'text-fondo' : 'text-primario'}`}
-					>
-						SIGUIENTE
-					</Texto>
-					<ArrowRight
-						size={28}
-						color={
-							seleccionado && seleccionado === pregunta?.nombre
-								? '#100e14'
-								: 'white'
-						}
-					/>
-				</TouchableOpacity>
 			</View>
 		</View>
 	);

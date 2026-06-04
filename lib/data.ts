@@ -66,40 +66,37 @@ export interface Pais {
 }
 
 interface ApiCountry {
-	name: string;
+	name: { common: string };
 	region: string;
-	flags: { png: string; svg: string };
-	translations: { es?: string };
+	flags: { png: string };
+	translations: { spa?: { common: string } };
+}
+
+async function fetchPaises(): Promise<ApiCountry[]> {
+	const res = await fetch(
+		'https://restcountries.com/v3.1/all?fields=name,flags,region,translations'
+	);
+	if (!res.ok) throw new Error('Error al obtener los países');
+	return res.json();
+}
+
+function mapPais(c: ApiCountry): Pais {
+	return {
+		nombre: c.translations?.spa?.common ?? c.name.common,
+		bandera: c.flags.png,
+		region: c.region,
+	};
 }
 
 export async function getPaisesPorContinente(region: string): Promise<Pais[]> {
-	const res = await fetch('https://apicountries.com/countries');
-	if (!res.ok) throw new Error('Error al obtener los países');
-
-	const data: ApiCountry[] = await res.json();
-
-	return data
-		.filter(c => c.region === region)
-		.map(c => ({
-			nombre: c.translations?.es ?? c.name,
-			bandera: c.flags.png,
-			region: c.region,
-		}));
+	const data = await fetchPaises();
+	return data.filter(c => c.region === region && c.flags.png).map(mapPais);
 }
 
 export async function getTodosLosPaises(): Promise<Pais[]> {
 	const regiones = continentes.map(c => c.region);
-
-	const res = await fetch('https://apicountries.com/countries');
-	if (!res.ok) throw new Error('Error al obtener los países');
-
-	const data: ApiCountry[] = await res.json();
-
+	const data = await fetchPaises();
 	return data
-		.filter(c => regiones.includes(c.region))
-		.map(c => ({
-			nombre: c.translations?.es ?? c.name,
-			bandera: c.flags.png,
-			region: c.region,
-		}));
+		.filter(c => regiones.includes(c.region) && c.flags.png)
+		.map(mapPais);
 }

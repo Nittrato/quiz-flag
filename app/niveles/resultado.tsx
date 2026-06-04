@@ -26,7 +26,7 @@ export default function NivelResultadoPage() {
 	const total = parseInt(params.total ?? '10', 10);
 	const dificultad = parseInt(params.dificultad ?? '1', 10);
 	const porcentaje = Math.round((correctas / total) * 100);
-	const aprobado = porcentaje >= 60;
+	const aprobado = porcentaje === 100; // solo 10/10 desbloquea el siguiente
 	const siguienteDesbloqueado = aprobado && dificultad < 5;
 
 	const { nivelesEstado } = useSettings();
@@ -85,7 +85,7 @@ export default function NivelResultadoPage() {
 						style={{ transform: [{ scale: badgeScale }] }}
 					>
 						<View
-							className={`flex-row items-center gap-2 px-5 py-2 rounded-full ${aprobado ? 'bg-color/20 border border-color' : 'bg-red-500/20 border border-red-500'}`}
+							className={`flex-row items-center gap-2 px-5 py-2 my-5 rounded-full ${aprobado ? 'bg-color/20 border border-color' : 'bg-red-500/20 border border-red-500'}`}
 						>
 							{aprobado ? (
 								<TickCircle
@@ -153,7 +153,7 @@ export default function NivelResultadoPage() {
 						<Lock size={24} color="#ef4444" variant="Bold" />
 						<View className="flex-1">
 							<Texto className="text-red-500 text-h4">
-								Necesitas 60% para avanzar
+								Necesitas 100% para avanzar
 							</Texto>
 							<Texto className="text-segundario text-base">
 								Obtuviste {porcentaje}% — acertaste {correctas}{' '}
@@ -162,42 +162,33 @@ export default function NivelResultadoPage() {
 						</View>
 					</View>
 				)}
+			</View>
 
-				{/* Botones */}
-				<View className="gap-3">
-					{aprobado && dificultad < 5 && (
-						<ScaleButton
-							className="bg-color rounded-rounded py-5 items-center justify-center"
-							onPress={() =>
-								router.replace(`/niveles/${dificultad + 1}`)
-							}
-						>
-							<Texto className="text-fondo text-h2 font-pixel">
-								NIVEL {dificultad + 1} →
-							</Texto>
-						</ScaleButton>
-					)}
-
+			{/* Botones */}
+			<View className="gap-5 m-screen">
+				{aprobado && dificultad < 5 && (
 					<ScaleButton
-						className={`rounded-rounded py-5 items-center justify-center ${aprobado && dificultad < 5 ? 'bg-card border border-border' : 'bg-color'}`}
-						onPress={() => router.replace(`/niveles/${dificultad}`)}
+						className="bg-color rounded-rounded py-5 items-center justify-center"
+						onPress={() =>
+							router.replace(`/niveles/${dificultad + 1}`)
+						}
 					>
-						<Texto
-							className={`text-h2 font-pixel ${aprobado && dificultad < 5 ? 'text-primario' : 'text-fondo'}`}
-						>
-							{aprobado ? 'REPETIR' : 'INTENTAR DE NUEVO'}
+						<Texto className="text-fondo text-h2 font-pixel">
+							NIVEL {dificultad + 1} →
 						</Texto>
 					</ScaleButton>
+				)}
 
-					<ScaleButton
-						className="bg-card border border-border rounded-rounded py-4 items-center justify-center"
-						onPress={() => router.replace('/')}
+				<ScaleButton
+					className={`rounded-rounded py-5 items-center justify-center ${aprobado && dificultad < 5 ? 'bg-card border border-border' : 'bg-color'}`}
+					onPress={() => router.replace(`/niveles/${dificultad}`)}
+				>
+					<Texto
+						className={`text-h2 font-pixel ${aprobado && dificultad < 5 ? 'text-primario' : 'text-fondo'}`}
 					>
-						<Texto className="text-segundario text-h4">
-							Volver al inicio
-						</Texto>
-					</ScaleButton>
-				</View>
+						{aprobado ? 'REPETIR' : 'INTENTAR DE NUEVO'}
+					</Texto>
+				</ScaleButton>
 			</View>
 		</Animated.View>
 	);

@@ -101,14 +101,12 @@ export default function ContinentePage() {
 	};
 
 	const handleSiguiente = useCallback(() => {
-		const correctasFinales =
-			correctas + (seleccionado === paisActual?.nombre ? 1 : 0);
 		if (indice + 1 >= totalPreguntas) {
 			if (timerRef.current) clearInterval(timerRef.current);
 			router.replace({
 				pathname: '/continente/resultado',
 				params: {
-					correctas: correctasFinales,
+					correctas,
 					total: totalPreguntas,
 					maxRacha,
 					continente: continente?.name ?? '',
@@ -121,7 +119,7 @@ export default function ContinentePage() {
 		setIndice(nuevoIndice);
 		setSeleccionado(null);
 		setOpciones(getOpciones(pool, paises[nuevoIndice]));
-	}, [indice, paises, pool, correctas, maxRacha, seleccionado, timer]);
+	}, [indice, paises, pool, correctas, maxRacha, timer]);
 
 	const progreso = (indice / totalPreguntas) * 100;
 	const enRacha = racha >= 3;

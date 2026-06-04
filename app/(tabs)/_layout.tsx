@@ -16,24 +16,6 @@ export default function TabsLayout() {
 					title: 'Home',
 				}}
 			/>
-			<Tabs.Screen
-				name="explorer"
-				options={{
-					title: 'Explorer',
-				}}
-			/>
-			<Tabs.Screen
-				name="save"
-				options={{
-					title: 'Guardar',
-				}}
-			/>
-			<Tabs.Screen
-				name="perfil"
-				options={{
-					title: 'Perfil',
-				}}
-			/>
 		</Tabs>
 	);
 }

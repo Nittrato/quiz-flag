@@ -18,6 +18,9 @@ export interface Pais {
 	nombre: string;
 	bandera: string;
 	region: string;
+	subregion: string;
+	independent: boolean;
+	population: number;
 }
 
 interface ApiCountry {
@@ -27,9 +30,10 @@ interface ApiCountry {
 	flags: { png: string };
 	translations: { spa?: { common: string } };
 	independent: boolean;
+	population: number;
 }
 
-// Subregiones consideradas "islas" para el filtro opcional
+// Subregiones consideradas "islas"
 const SUBREGIONES_ISLAS = new Set([
 	'Caribbean',
 	'Micronesia',
@@ -39,15 +43,49 @@ const SUBREGIONES_ISLAS = new Set([
 	'Indian Ocean',
 ]);
 
-function esIsla(c: ApiCountry): boolean {
+export function esIsla(c: {
+	independent: boolean;
+	subregion: string;
+}): boolean {
 	if (!c.independent) return true;
 	if (SUBREGIONES_ISLAS.has(c.subregion)) return true;
 	return false;
 }
 
+// Umbral de población por dificultad (de más conocido a más oscuro)
+const UMBRAL_POBLACION: Record<number, [number, number]> = {
+	1: [50_000_000, Infinity], // > 50M  — muy conocidos
+	2: [10_000_000, 50_000_000], // 10M–50M
+	3: [1_000_000, 10_000_000], // 1M–10M
+	4: [100_000, 1_000_000], // 100K–1M
+	5: [0, 100_000], // < 100K — micro-estados e islas
+};
+
+export function getPaisPorDificultad(
+	paises: Pais[],
+	dificultad: number
+): Pais[] {
+	const [min, max] = UMBRAL_POBLACION[dificultad] ?? [0, Infinity];
+	const filtrados = paises.filter(
+		p => p.population >= min && p.population < max
+	);
+	// Si el nivel tiene muy pocos países (p.ej. dificultad 5 con islas desactivadas)
+	// amplía el pool con el nivel anterior para garantizar al menos 20 opciones
+	if (filtrados.length < 20) {
+		const [minAnterior] = UMBRAL_POBLACION[Math.max(1, dificultad - 1)] ?? [
+			0,
+			Infinity,
+		];
+		return paises.filter(
+			p => p.population >= minAnterior && p.population < max
+		);
+	}
+	return filtrados;
+}
+
 async function fetchPaises(): Promise<ApiCountry[]> {
 	const res = await fetch(
-		'https://restcountries.com/v3.1/all?fields=name,flags,region,subregion,translations,independent'
+		'https://restcountries.com/v3.1/all?fields=name,flags,region,subregion,translations,independent,population'
 	);
 	if (!res.ok) throw new Error('Error al obtener los países');
 	return res.json();
@@ -58,6 +96,9 @@ function mapPais(c: ApiCountry): Pais {
 		nombre: c.translations?.spa?.common ?? c.name.common,
 		bandera: c.flags.png,
 		region: c.region,
+		subregion: c.subregion,
+		independent: c.independent,
+		population: c.population ?? 0,
 	};
 }
 

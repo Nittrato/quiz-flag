@@ -7,7 +7,7 @@ import {
 	Animated,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { getTodosLosPaises, Pais } from '../../lib/data';
+import { getTodosLosPaises, getPaisPorDificultad, Pais } from '../../lib/data';
 import { useSettings } from '../../lib/settings';
 import Texto from '../../template/Texto';
 import { Add, ArrowRight, Clock } from 'iconsax-react-nativejs';
@@ -78,10 +78,16 @@ export default function NivelPage() {
 	useEffect(() => {
 		getTodosLosPaises()
 			.then(data => {
-				const mezclados = shuffle(data).slice(0, TOTAL_PREGUNTAS);
-				setPool(data);
+				const poolDificultad = getPaisPorDificultad(data, dificultad);
+				const mezclados = shuffle(poolDificultad).slice(
+					0,
+					TOTAL_PREGUNTAS
+				);
+				setPool(poolDificultad);
 				setPaises(mezclados);
-				setOpciones(getOpciones(data, mezclados[0], dificultad));
+				setOpciones(
+					getOpciones(poolDificultad, mezclados[0], dificultad)
+				);
 				setCargando(false);
 			})
 			.catch(() => setCargando(false));
@@ -132,14 +138,12 @@ export default function NivelPage() {
 	};
 
 	const handleSiguiente = useCallback(() => {
-		const correctasFinales =
-			correctas + (seleccionado === paisActual?.nombre ? 1 : 0);
 		if (indice + 1 >= TOTAL_PREGUNTAS) {
-			completarNivel(dificultad, correctasFinales, TOTAL_PREGUNTAS);
+			completarNivel(dificultad, correctas, TOTAL_PREGUNTAS);
 			router.replace({
 				pathname: '/niveles/resultado',
 				params: {
-					correctas: correctasFinales,
+					correctas,
 					total: TOTAL_PREGUNTAS,
 					dificultad,
 				},
@@ -150,7 +154,7 @@ export default function NivelPage() {
 		setIndice(nuevoIndice);
 		setSeleccionado(null);
 		setOpciones(getOpciones(pool, paises[nuevoIndice], dificultad));
-	}, [indice, paises, pool, correctas, seleccionado, dificultad]);
+	}, [indice, paises, pool, correctas, dificultad]);
 
 	const progreso = (indice / TOTAL_PREGUNTAS) * 100;
 

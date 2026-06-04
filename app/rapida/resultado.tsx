@@ -48,12 +48,30 @@ export default function RapidaResultadoPage() {
 					/>
 				</TouchableOpacity>
 				<Texto className="text-primario text-h2 font-pixel">
-					PARTIDA RÁPIDA
+					RESULTADOS
 				</Texto>
 				<View className="w-ancho" />
 			</View>
 
 			<View className="flex-1 justify-evenly mx-screen">
+				{/* Score principal */}
+				<Animated.View
+					style={{ transform: [{ scale: scoreScale }] }}
+					className="items-center justify-center gap-5 bg-card/50 mx-auto w-80 h-80 rounded-full"
+				>
+					<Texto
+						className="text-color font-pixel"
+						style={{ fontSize: 120, lineHeight: 100 }}
+					>
+						{correctas}
+					</Texto>
+					<Texto className="text-segundario text-h3 font-pixel uppercase">
+						{correctas === 1
+							? 'bandera acertada'
+							: 'banderas acertadas'}
+					</Texto>
+				</Animated.View>
+
 				{/* Motivo de fin */}
 				<View
 					className={`rounded-rounded2 p-screen flex-row items-center gap-4 ${porTiempo ? 'bg-border' : 'bg-red-500/15'}`}
@@ -78,45 +96,6 @@ export default function RapidaResultadoPage() {
 						</Texto>
 					</View>
 				</View>
-
-				{/* Score principal */}
-				<Animated.View
-					style={{ transform: [{ scale: scoreScale }] }}
-					className="items-center gap-3"
-				>
-					<Texto className="text-segundario text-h4">
-						Puntaje final
-					</Texto>
-					<Texto
-						className="text-color font-pixel"
-						style={{ fontSize: 96, lineHeight: 100 }}
-					>
-						{correctas}
-					</Texto>
-					<Texto className="text-segundario text-h4">
-						{correctas === 1
-							? 'bandera acertada'
-							: 'banderas acertadas'}
-					</Texto>
-				</Animated.View>
-
-				{/* Mensaje según puntaje */}
-				<View className="bg-card rounded-rounded2 p-screen items-center gap-2">
-					<Texto className="text-primario text-h3 text-center">
-						{correctas === 0 && '¡Sigue practicando!'}
-						{correctas >= 1 && correctas < 5 && '¡Buen intento!'}
-						{correctas >= 5 && correctas < 10 && '¡Muy bien!'}
-						{correctas >= 10 && correctas < 20 && '¡Excelente!'}
-						{correctas >= 20 && '🏆 ¡Eres un experto!'}
-					</Texto>
-					<Texto className="text-segundario text-base text-center">
-						{correctas > 0
-							? `Conseguiste ${correctas} ${correctas === 1 ? 'punto' : 'puntos'} en esta partida`
-							: 'Intenta llegar al menos a 5 puntos'}
-					</Texto>
-				</View>
-
-				{/* Botones */}
 			</View>
 
 			{/* Botones */}

@@ -13,9 +13,9 @@ import {
 	Record,
 } from 'iconsax-react-nativejs';
 import { ScaleButton } from '../template/AnimatedElements';
-import { niveles } from '../lib/data';
+import { useSettings } from '../lib/settings';
+import { useRouter } from 'expo-router';
 
-// convierte los numeros en estados para poder usarlos
 type ProgresoEstado = 'incompleto' | 'en_proceso' | 'completo';
 
 function getEstadoProgreso(progreso: number): ProgresoEstado {
@@ -24,19 +24,14 @@ function getEstadoProgreso(progreso: number): ProgresoEstado {
 	return 'en_proceso';
 }
 
-// convierte los numeros en iconos
 function IconoEstado({ estado }: { estado: ProgresoEstado }) {
-	if (estado === 'completo') {
+	if (estado === 'completo')
 		return <TickCircle size={20} color="#19151f" variant="Bold" />;
-	}
-	if (estado === 'en_proceso') {
+	if (estado === 'en_proceso')
 		return <Clock size={20} color="#19151f" variant="Bold" />;
-	}
-	// incompleto
 	return <Record size={20} color="#19151f" variant="Bold" />;
 }
 
-// convierte los numeros en barra de progreso
 function BarraProgreso({
 	progreso,
 	estado,
@@ -44,15 +39,9 @@ function BarraProgreso({
 	progreso: number;
 	estado: ProgresoEstado;
 }) {
-	const colorBarra =
-		estado === 'completo'
-			? 'bg-[#a1ec3c]'
-			: estado === 'en_proceso'
-				? 'bg-[#a1ec3c]'
-				: 'bg-[#4a4a4a]';
-
+	const colorBarra = estado !== 'incompleto' ? 'bg-color' : 'bg-trans2';
 	return (
-		<View className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+		<View className="w-full h-1.5 bg-trans rounded-full overflow-hidden">
 			<View
 				className={`h-full rounded-full ${colorBarra}`}
 				style={{ width: `${progreso}%` }}
@@ -61,52 +50,54 @@ function BarraProgreso({
 	);
 }
 
+const dificultadLabel: Record<number, string> = {
+	1: 'Novato',
+	2: 'Intermedio',
+	3: 'Avanzado',
+	4: 'Experto',
+	5: 'Leyenda',
+};
+
+const dificultadIcono: Record<number, (color: string) => React.ReactElement> = {
+	1: c => <Smileys size={22} color={c} variant="Bold" />,
+	2: c => <Book1 size={22} color={c} variant="Bold" />,
+	3: c => <Flash size={22} color={c} variant="Bold" />,
+	4: c => <Crown size={22} color={c} variant="Bold" />,
+	5: c => <Medal size={22} color={c} variant="Bold" />,
+};
+
+const estadoLabel: Record<ProgresoEstado, string> = {
+	incompleto: 'Sin comenzar',
+	en_proceso: 'En proceso',
+	completo: 'Completado',
+};
+
 export default function Niveles() {
-	// convertir niveles en texto
-	const dificultadLabel: Record<number, string> = {
-		1: 'Novato',
-		2: 'Intermedio',
-		3: 'Avanzado',
-		4: 'Experto',
-		5: 'Leyenda',
-	};
-
-	// convertir niveles en iconos (recibe color para soportar estado bloqueado)
-	const dificultadIcono: Record<
-		number,
-		(color: string) => React.ReactElement
-	> = {
-		1: color => <Smileys size={22} color={color} variant="Bold" />,
-		2: color => <Book1 size={22} color={color} variant="Bold" />,
-		3: color => <Flash size={22} color={color} variant="Bold" />,
-		4: color => <Crown size={22} color={color} variant="Bold" />,
-		5: color => <Medal size={22} color={color} variant="Bold" />,
-	};
-
-	// convierte los numeros en estados y luego a textos
-	const estadoLabel: Record<ProgresoEstado, string> = {
-		incompleto: 'Sin comenzar',
-		en_proceso: 'En proceso',
-		completo: 'Completado',
-	};
+	const { nivelesEstado } = useSettings();
+	const router = useRouter();
 
 	return (
 		<View className="flex flex-col gap-5">
-			{niveles.map(nivel => {
+			{nivelesEstado.map(nivel => {
 				const bloqueado = !nivel.estado;
 				const estado = getEstadoProgreso(nivel.progreso);
 				return (
 					<ScaleButton
 						key={nivel.id}
 						className={`card p-6 flex flex-row gap-4 items-center ${bloqueado ? 'opacity-50' : ''}`}
+						onPress={
+							bloqueado
+								? undefined
+								: () =>
+										router.push(
+											`/niveles/${nivel.dificultad}`
+										)
+						}
+						disabled={bloqueado}
 					>
-						{/* Icono de dificultad estado/candado */}
+						{/* Icono de dificultad */}
 						<View
-							className={`border rounded-full p-4 ${
-								bloqueado
-									? 'bg-white/5 border-white/10'
-									: 'bg-color/20 border-color'
-							}`}
+							className={`border rounded-full p-4 ${bloqueado ? 'bg-trans border-trans2' : 'bg-color/20 border-color'}`}
 						>
 							{dificultadIcono[nivel.dificultad](
 								bloqueado ? '#6b7280' : '#a1ec3c'
@@ -117,22 +108,20 @@ export default function Niveles() {
 						<View className="flex flex-col gap-2 flex-1">
 							<View className="flex flex-row items-center justify-between">
 								<Texto
-									className={`text-h4 font-medium ${bloqueado ? 'text-white/30' : 'text-primario'}`}
+									className={`text-h4 ${bloqueado ? 'text-primario/30' : 'text-primario'}`}
 								>
 									{dificultadLabel[nivel.dificultad]}
 								</Texto>
-								{bloqueado ? (
-									<Texto className="text-white/30 text-sm">
-										Bloqueado
-									</Texto>
-								) : (
-									<Texto className="text-segundario text-sm">
-										{estadoLabel[estado]}
-									</Texto>
-								)}
+								<Texto
+									className={`text-base ${bloqueado ? 'text-primario/30' : 'text-segundario'}`}
+								>
+									{bloqueado
+										? 'Bloqueado'
+										: estadoLabel[estado]}
+								</Texto>
 							</View>
 							{bloqueado ? (
-								<View className="w-full h-1.5 bg-white/10 rounded-full" />
+								<View className="w-full h-1.5 bg-trans rounded-full" />
 							) : (
 								<BarraProgreso
 									progreso={nivel.progreso}
@@ -141,9 +130,9 @@ export default function Niveles() {
 							)}
 						</View>
 
-						{/* Icono de estado / candado */}
+						{/* Badge estado / candado */}
 						<View
-							className={`py-2 px-4 rounded-rounded ${bloqueado ? 'bg-white/10' : 'bg-color'}`}
+							className={`py-2 px-4 rounded-rounded ${bloqueado ? 'bg-trans' : 'bg-color'}`}
 						>
 							{bloqueado ? (
 								<Lock

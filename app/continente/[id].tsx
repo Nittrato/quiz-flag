@@ -104,7 +104,7 @@ export default function ContinentePage() {
 		if (indice + 1 >= totalPreguntas) {
 			if (timerRef.current) clearInterval(timerRef.current);
 			router.replace({
-				pathname: '/resultado',
+				pathname: '/continente/resultado',
 				params: {
 					correctas: correctasFinales,
 					total: totalPreguntas,
@@ -236,24 +236,23 @@ export default function ContinentePage() {
 						</View>
 					)}
 				</Animated.View>
-
-				{/* Botón siguiente */}
-				<TouchableOpacity
-					className={`rounded-rounded2 flex-row gap-4 py-5 justify-center items-center ${seleccionado ? 'bg-color' : 'bg-card opacity-40'}`}
-					onPress={seleccionado ? handleSiguiente : undefined}
-					disabled={!seleccionado}
-				>
-					<Texto
-						className={`text-h2 font-pixel ${seleccionado ? 'text-fondo' : 'text-primario'}`}
-					>
-						SIGUIENTE
-					</Texto>
-					<ArrowRight
-						size={28}
-						color={seleccionado ? '#100e14' : 'white'}
-					/>
-				</TouchableOpacity>
 			</View>
+			{/* Botón siguiente */}
+			<TouchableOpacity
+				className={`rounded-rounded2 flex-row gap-4 py-5 m-screen justify-center items-center ${seleccionado ? 'bg-color' : 'bg-card opacity-40'}`}
+				onPress={seleccionado ? handleSiguiente : undefined}
+				disabled={!seleccionado}
+			>
+				<Texto
+					className={`text-h2 font-pixel ${seleccionado ? 'text-fondo' : 'text-primario'}`}
+				>
+					SIGUIENTE
+				</Texto>
+				<ArrowRight
+					size={28}
+					color={seleccionado ? '#100e14' : 'white'}
+				/>
+			</TouchableOpacity>
 		</View>
 	);
 }

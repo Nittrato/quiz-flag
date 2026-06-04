@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { View, TouchableOpacity, Animated, Easing } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import Texto from '../template/Texto';
-import { ScaleButton } from '../template/AnimatedElements';
+import Texto from '../../template/Texto';
+import { ScaleButton } from '../../template/AnimatedElements';
 import { Add, Star1, Clock, Chart } from 'iconsax-react-nativejs';
-import CirculoProgreso from '../components/CirculoProgreso';
+import CirculoProgreso from '../../components/CirculoProgreso';
 
 function formatTime(seg: number) {
 	const m = Math.floor(seg / 60)
@@ -170,17 +170,16 @@ export default function ResultadoPage() {
 						/>
 					</View>
 				</View>
-
-				{/* CTA */}
-				<ScaleButton
-					className="bg-color rounded-rounded py-5 items-center justify-center"
-					onPress={() => router.replace('/')}
-				>
-					<Texto className="text-fondo text-h2 font-pixel">
-						TERMINAR
-					</Texto>
-				</ScaleButton>
 			</View>
+			{/* CTA */}
+			<ScaleButton
+				className="bg-color rounded-rounded py-5 m-5 items-center justify-center"
+				onPress={() => router.replace('/')}
+			>
+				<Texto className="text-fondo text-h2 font-pixel">
+					TERMINAR
+				</Texto>
+			</ScaleButton>
 		</Animated.View>
 	);
 }

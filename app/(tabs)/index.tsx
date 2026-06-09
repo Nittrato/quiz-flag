@@ -38,7 +38,7 @@ export default function Home() {
 							PARTIDA RAPIDA
 						</Texto>
 						<Texto className="text-segundario text-h4">
-							Desafio aleatorio de 10 banderas de distindos
+							Desafio aleatorio de paises de diferentes
 							continentes con cronometro
 						</Texto>
 					</View>

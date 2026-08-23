@@ -29,7 +29,7 @@ export default function Home() {
 			>
 				<View className="bg-color rounded-rounded px-4 py-3">
 					<Texto className="text-card text-base font-bold">
-						60 sec
+						Sin limite de tiempo
 					</Texto>
 				</View>
 				<View className="flex flex-row justify-between items-end w-full">

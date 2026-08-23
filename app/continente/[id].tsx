@@ -179,13 +179,13 @@ export default function ContinentePage() {
 				</View>
 
 				{/* Bandera */}
-				<View className="card items-center justify-center p-4 h-72">
+				<View className="card items-center justify-center p-4">
 					{cargando || !paisActual ? (
 						<ActivityIndicator size="large" color="#a1ec3c" />
 					) : (
 						<Image
-							source={{ uri: paisActual.bandera }}
-							className="w-full h-full rounded-rounded"
+							source={paisActual.bandera}
+							className="w-full rounded-rounded"
 							resizeMode="cover"
 						/>
 					)}

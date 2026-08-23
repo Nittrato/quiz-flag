@@ -12,8 +12,6 @@ import Texto from '../../template/Texto';
 import { Add, Clock } from 'iconsax-react-nativejs';
 import { useSettings } from '../../lib/settings';
 
-const TIEMPO_INICIAL = 60;
-
 function shuffle<T>(arr: T[]): T[] {
 	return [...arr].sort(() => Math.random() - 0.5);
 }
@@ -21,6 +19,14 @@ function shuffle<T>(arr: T[]): T[] {
 function getOpciones(pool: Pais[], correcto: Pais): Pais[] {
 	const otros = pool.filter(p => p.nombre !== correcto.nombre);
 	return shuffle([...shuffle(otros).slice(0, 3), correcto]);
+}
+
+function formatTime(seg: number) {
+	const m = Math.floor(seg / 60)
+		.toString()
+		.padStart(2, '0');
+	const s = (seg % 60).toString().padStart(2, '0');
+	return `${m}:${s}`;
 }
 
 export default function RapidaPage() {
@@ -31,11 +37,10 @@ export default function RapidaPage() {
 	const [cargando, setCargando] = useState(true);
 	const [seleccionado, setSeleccionado] = useState<string | null>(null);
 	const [correctas, setCorrectas] = useState(0);
-	const [tiempoRestante, setTiempoRestante] = useState(TIEMPO_INICIAL);
-	const [terminado, setTerminado] = useState(false);
+	const [timer, setTimer] = useState(0);
 
-	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const contadorScale = useRef(new Animated.Value(1)).current;
+	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	// Carga todos los países
 	useEffect(() => {
@@ -50,33 +55,14 @@ export default function RapidaPage() {
 			.catch(() => setCargando(false));
 	}, []);
 
-	// Timer regresivo — arranca cuando carga
 	useEffect(() => {
-		if (cargando) return;
-		timerRef.current = setInterval(() => {
-			setTiempoRestante(t => {
-				if (t <= 1) {
-					clearInterval(timerRef.current!);
-					setTerminado(true);
-					return 0;
-				}
-				return t - 1;
-			});
-		}, 1000);
+		if (!cargando) {
+			timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
+		}
 		return () => {
 			if (timerRef.current) clearInterval(timerRef.current);
 		};
 	}, [cargando]);
-
-	// Cuando termina el tiempo navega a resultado
-	useEffect(() => {
-		if (terminado) {
-			router.replace({
-				pathname: '/rapida/resultado',
-				params: { correctas, porTiempo: '1' },
-			});
-		}
-	}, [terminado]);
 
 	const animarBoton = () => {
 		contadorScale.setValue(1.15);
@@ -108,12 +94,12 @@ export default function RapidaPage() {
 			// Pausa breve para ver el verde y pasa a la siguiente
 			setTimeout(() => siguientePregunta(pool, pregunta), 600);
 		} else {
-			// Falla → muestra el rojo 1 seg y termina
+			// Falla → detiene el cronómetro, muestra el rojo 1 seg y termina
 			if (timerRef.current) clearInterval(timerRef.current);
 			setTimeout(() => {
 				router.replace({
 					pathname: '/rapida/resultado',
-					params: { correctas, porTiempo: '0' },
+					params: { correctas, tiempo: timer },
 				});
 			}, 1000);
 		}
@@ -130,20 +116,12 @@ export default function RapidaPage() {
 		return 'bg-card border-border';
 	};
 
-	const porcentajeTimer = (tiempoRestante / TIEMPO_INICIAL) * 100;
-	const timerColor =
-		tiempoRestante <= 10
-			? '#ef4444'
-			: tiempoRestante <= 20
-				? '#f97316'
-				: '#a1ec3c';
-
 	return (
 		<View className="flex-1">
 			{/* Header */}
 			<View className="flex-row justify-between items-center p-5">
 				<TouchableOpacity
-					className="bg-card w-ancho h-alto justify-center items-center rounded-rounded2"
+					className="card w-ancho h-alto justify-center items-center"
 					onPress={() => {
 						if (timerRef.current) clearInterval(timerRef.current);
 						router.back();
@@ -156,22 +134,11 @@ export default function RapidaPage() {
 					/>
 				</TouchableOpacity>
 
-				{/* Barra de tiempo regresiva */}
-				<View className="flex-1 mx-4 h-2 bg-border rounded-full overflow-hidden">
-					<View
-						style={{
-							width: `${porcentajeTimer}%`,
-							backgroundColor: timerColor,
-						}}
-						className="h-full rounded-full"
-					/>
-				</View>
-
-				{/* Contador de tiempo */}
+				{/* Timer */}
 				<View className="flex-row gap-1 bg-card border border-border px-4 py-3 rounded-full items-center">
-					<Clock size={18} color={timerColor} />
-					<Texto className="text-h4" style={{ color: timerColor }}>
-						{String(tiempoRestante).padStart(2, '0')}s
+					<Clock size={18} color="white" />
+					<Texto className="text-primario text-h4">
+						{formatTime(timer)}
 					</Texto>
 				</View>
 			</View>
@@ -186,13 +153,13 @@ export default function RapidaPage() {
 				</View>
 
 				{/* Bandera */}
-				<View className="card items-center justify-center p-4 h-72">
+				<View className="card items-center justify-center p-4">
 					{cargando || !pregunta ? (
 						<ActivityIndicator size="large" color="#a1ec3c" />
 					) : (
 						<Image
-							source={{ uri: pregunta.bandera }}
-							className="w-full h-full rounded-rounded"
+							source={pregunta.bandera}
+							className="w-full rounded-rounded"
 							resizeMode="cover"
 						/>
 					)}

@@ -3,16 +3,24 @@ import { View, TouchableOpacity, Animated } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import Texto from '../../template/Texto';
 import { ScaleButton } from '../../template/AnimatedElements';
-import { Add, Star1, CloseCircle } from 'iconsax-react-nativejs';
+import { Add, CloseCircle, Clock } from 'iconsax-react-nativejs';
+
+function formatTime(seg: number) {
+	const m = Math.floor(seg / 60)
+		.toString()
+		.padStart(2, '0');
+	const s = (seg % 60).toString().padStart(2, '0');
+	return `${m}:${s}`;
+}
 
 export default function RapidaResultadoPage() {
 	const params = useLocalSearchParams<{
 		correctas: string;
-		porTiempo: string;
+		tiempo: string;
 	}>();
 
 	const correctas = parseInt(params.correctas ?? '0', 10);
-	const porTiempo = params.porTiempo === '1';
+	const tiempo = parseInt(params.tiempo ?? '0', 10);
 
 	const fadeAnim = useRef(new Animated.Value(0)).current;
 	const scoreScale = useRef(new Animated.Value(0.5)).current;
@@ -72,28 +80,30 @@ export default function RapidaResultadoPage() {
 					</Texto>
 				</Animated.View>
 
-				{/* Motivo de fin */}
-				<View
-					className={`rounded-rounded2 p-screen flex-row items-center gap-4 ${porTiempo ? 'bg-border' : 'bg-red-500/15'}`}
-				>
-					{porTiempo ? (
-						<Star1 size={26} color="#a1ec3c" variant="Bold" />
-					) : (
+				{/* Motivo de fin y Tiempo */}
+				<View className="gap-3">
+					<View className="rounded-rounded2 p-screen flex-row items-center gap-4 bg-red-500/15">
 						<CloseCircle size={26} color="#ef4444" variant="Bold" />
-					)}
-					<View>
-						<Texto
-							className={`text-h3 font-pixel ${porTiempo ? 'text-color' : 'text-red-500'}`}
-						>
-							{porTiempo
-								? '¡TIEMPO AGOTADO!'
-								: '¡RESPUESTA INCORRECTA!'}
-						</Texto>
-						<Texto className="text-segundario text-base">
-							{porTiempo
-								? 'Se acabaron los 60 segundos'
-								: 'La racha se cortó'}
-						</Texto>
+						<View>
+							<Texto className="text-h3 font-pixel text-red-500">
+								¡RESPUESTA INCORRECTA!
+							</Texto>
+							<Texto className="text-segundario text-base">
+								La racha se cortó
+							</Texto>
+						</View>
+					</View>
+
+					<View className="rounded-rounded2 p-screen flex-row items-center gap-4 bg-card border border-border">
+						<Clock size={26} color="#a1ec3c" variant="Bold" />
+						<View>
+							<Texto className="text-h3 font-pixel text-primario">
+								TIEMPO TRANSCURRIDO
+							</Texto>
+							<Texto className="text-segundario text-h4 font-pixel">
+								{formatTime(tiempo)}
+							</Texto>
+						</View>
 					</View>
 				</View>
 			</View>

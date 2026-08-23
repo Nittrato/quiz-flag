@@ -1,38 +1,41 @@
 {
-	"expo": {
-		"name": "flag-app",
-		"slug": "flag-app",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./assets/icon.png",
-		"userInterfaceStyle": "dark",
-		"newArchEnabled": true,
-		"scheme": "flag-app",
-		"splash": {
-			"image": "./assets/icon.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#100e14"
-		},
-		"ios": {
-			"supportsTablet": true
-		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/icon.png",
-				"backgroundColor": "#100e14"
-			},
-			"edgeToEdgeEnabled": true
-		},
-		"web": {
-			"favicon": "./assets/favicon.png",
-			"bundler": "metro"
-		},
-		"plugins": ["expo-router"],
-		"extra": {
-			"router": {},
-			"eas": {
-				"projectId": ""
-			}
-		}
-	}
+  "expo": {
+    "name": "flag-app",
+    "slug": "flag-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "scheme": "flag-app",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#100e14"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#100e14"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.nitrato.flagapp"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b975fb87-f313-446e-a6c3-37fb0afac34a"
+      }
+    }
+  }
 }

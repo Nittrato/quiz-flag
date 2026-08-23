@@ -1,3 +1,6 @@
+import paisesData from './paises.json';
+import { BANDERAS_LOCALES } from './banderaMap';
+
 export const continentes = [
 	{ id: '1', name: 'Europa', region: 'Europe' },
 	{ id: '2', name: 'America', region: 'Americas' },
@@ -16,7 +19,7 @@ export const niveles = [
 
 export interface Pais {
 	nombre: string;
-	bandera: string;
+	bandera: any;
 	region: string;
 	subregion: string;
 	independent: boolean;
@@ -84,17 +87,16 @@ export function getPaisPorDificultad(
 }
 
 async function fetchPaises(): Promise<ApiCountry[]> {
-	const res = await fetch(
-		'https://restcountries.com/v3.1/all?fields=name,flags,region,subregion,translations,independent,population'
-	);
-	if (!res.ok) throw new Error('Error al obtener los países');
-	return res.json();
+	return paisesData as ApiCountry[];
 }
 
 function mapPais(c: ApiCountry): Pais {
+	const parts = c.flags.png.split('/');
+	const filename = parts[parts.length - 1] || '';
+	const code = filename.replace('.png', '').toLowerCase();
 	return {
 		nombre: c.translations?.spa?.common ?? c.name.common,
-		bandera: c.flags.png,
+		bandera: BANDERAS_LOCALES[code] ?? null,
 		region: c.region,
 		subregion: c.subregion,
 		independent: c.independent,

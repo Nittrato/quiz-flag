@@ -6,13 +6,8 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    
     "scheme": "flag-app",
-    "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#100e14"
-    },
     "ios": {
       "supportsTablet": true
     },
@@ -21,7 +16,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#100e14"
       },
-      "edgeToEdgeEnabled": true,
+      
       "package": "com.nitrato.flagapp"
     },
     "web": {
@@ -29,7 +24,17 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#100e14"
+        }
+      ],
+      "expo-font"
     ],
     "extra": {
       "router": {},

@@ -65,7 +65,7 @@ export default function RapidaResultadoPage() {
 				{/* Score principal */}
 				<Animated.View
 					style={{ transform: [{ scale: scoreScale }] }}
-					className="items-center justify-center gap-5 bg-card/50 mx-auto w-80 h-80 rounded-full"
+					className="items-center justify-center gap-5  mx-auto w-80 h-80"
 				>
 					<Texto
 						className="text-color font-pixel"

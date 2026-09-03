@@ -25,7 +25,7 @@ export default function Home() {
 			{/* partida rapida */}
 			<ScaleButton
 				className="flex flex-col mt-12 h-60 bg-card border p-7 justify-between items-end border-border rounded-rounded2 mx-screen"
-				onPress={() => router.push(`/rapida/{id}`)}
+				onPress={() => router.push(`/rapida/1`)}
 			>
 				<View className="bg-color rounded-rounded px-4 py-3">
 					<Texto className="text-card text-base font-bold">

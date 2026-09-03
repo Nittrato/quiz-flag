@@ -91,6 +91,8 @@ async function fetchPaises(): Promise<ApiCountry[]> {
 }
 
 function mapPais(c: ApiCountry): Pais {
+	// flags.png es una ruta local a assets/flags-png (p.ej. '../assets/flags-png/af.png');
+	// de ahí se extrae el código de país para buscar la bandera local en banderaMap.
 	const parts = c.flags.png.split('/');
 	const filename = parts[parts.length - 1] || '';
 	const code = filename.replace('.png', '').toLowerCase();

@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    
     "scheme": "flag-app",
     "ios": {
       "supportsTablet": true
@@ -16,7 +15,6 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#100e14"
       },
-      
       "package": "com.nitrato.flagapp"
     },
     "web": {
@@ -39,8 +37,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b975fb87-f313-446e-a6c3-37fb0afac34a"
+        "projectId": "d82b95de-f833-41aa-86d8-27c47407ac21"
       }
-    }
+    },
+    "owner": "nitrato"
   }
 }

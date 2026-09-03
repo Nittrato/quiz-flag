@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
 	View,
 	TouchableOpacity,
@@ -10,7 +10,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { getTodosLosPaises, getPaisPorDificultad, Pais } from '../../lib/data';
 import { useSettings } from '../../lib/settings';
 import Texto from '../../template/Texto';
-import { Add, ArrowRight, Clock } from 'iconsax-react-nativejs';
+import { Add, Clock } from 'iconsax-react-nativejs';
 
 // Segundos por pregunta según dificultad
 const TIEMPO_POR_DIFICULTAD: Record<number, number> = {
@@ -21,7 +21,16 @@ const TIEMPO_POR_DIFICULTAD: Record<number, number> = {
 	5: 12,
 };
 
-const TOTAL_PREGUNTAS = 10;
+// Aciertos consecutivos para superar el nivel
+const META_NIVEL = 10;
+
+const dificultadLabel: Record<number, string> = {
+	1: 'Novato',
+	2: 'Intermedio',
+	3: 'Avanzado',
+	4: 'Experto',
+	5: 'Leyenda',
+};
 
 function shuffle<T>(arr: T[]): T[] {
 	return [...arr].sort(() => Math.random() - 0.5);
@@ -63,61 +72,124 @@ export default function NivelPage() {
 	const conTimer = tiempoPorPregunta > 0;
 
 	const [pool, setPool] = useState<Pais[]>([]);
-	const [paises, setPaises] = useState<Pais[]>([]);
-	const [cargando, setCargando] = useState(true);
-	const [indice, setIndice] = useState(0);
+	const [pregunta, setPregunta] = useState<Pais | null>(null);
 	const [opciones, setOpciones] = useState<Pais[]>([]);
+	const [cargando, setCargando] = useState(true);
 	const [seleccionado, setSeleccionado] = useState<string | null>(null);
 	const [correctas, setCorrectas] = useState(0);
-	const [errores, setErrores] = useState(0);
 	const [tiempoRestante, setTiempoRestante] = useState(tiempoPorPregunta);
+	const [tiempoAgotado, setTiempoAgotado] = useState(false);
+	const [timer, setTimer] = useState(0);
 
 	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const contadorScale = useRef(new Animated.Value(1)).current;
+	const finalizadoRef = useRef(false);
 
+	// Carga todos los países
 	useEffect(() => {
 		getTodosLosPaises()
 			.then(data => {
 				const poolDificultad = getPaisPorDificultad(data, dificultad);
-				const mezclados = shuffle(poolDificultad).slice(
-					0,
-					TOTAL_PREGUNTAS
-				);
 				setPool(poolDificultad);
-				setPaises(mezclados);
-				setOpciones(
-					getOpciones(poolDificultad, mezclados[0], dificultad)
-				);
+				const primera = shuffle(poolDificultad)[0];
+				setPregunta(primera);
+				setOpciones(getOpciones(poolDificultad, primera, dificultad));
 				setCargando(false);
 			})
 			.catch(() => setCargando(false));
-	}, []);
+	}, [dificultad]);
 
-	// Timer por pregunta (solo dificultad ≥ 3)
+	// Cronómetro general (mismo estilo que la partida rápida)
 	useEffect(() => {
-		if (!conTimer || cargando || seleccionado) return;
+		if (!cargando) {
+			timerRef.current = setInterval(() => setTimer(t => t + 1), 1000);
+		}
+		return () => {
+			if (timerRef.current) clearInterval(timerRef.current);
+		};
+	}, [cargando]);
+
+	// Timer por pregunta (solo dificultad >= 3)
+	useEffect(() => {
+		if (
+			!conTimer ||
+			cargando ||
+			!pregunta ||
+			seleccionado ||
+			tiempoAgotado ||
+			finalizadoRef.current
+		)
+			return;
 		setTiempoRestante(tiempoPorPregunta);
-		timerRef.current = setInterval(() => {
+		const ref = setInterval(() => {
 			setTiempoRestante(t => {
 				if (t <= 1) {
-					clearInterval(timerRef.current!);
-					// Tiempo agotado = respuesta incorrecta automática
-					setSeleccionado('__timeout__');
-					setErrores(e => e + 1);
+					clearInterval(ref);
+					setTiempoAgotado(true);
 					return 0;
 				}
 				return t - 1;
 			});
 		}, 1000);
-		return () => {
+		return () => clearInterval(ref);
+	}, [
+		pregunta,
+		cargando,
+		seleccionado,
+		tiempoAgotado,
+		conTimer,
+		tiempoPorPregunta,
+	]);
+
+	// Falla → detiene cronómetros, muestra el rojo 1 seg y termina
+	const finalizarPartida = useCallback(
+		(respuesta: string) => {
+			if (finalizadoRef.current) return;
+			finalizadoRef.current = true;
 			if (timerRef.current) clearInterval(timerRef.current);
-		};
-	}, [indice, cargando]);
+			setSeleccionado(respuesta || '__timeout__');
+			completarNivel(dificultad, correctas, META_NIVEL);
+			setTimeout(() => {
+				router.replace({
+					pathname: '/niveles/resultado',
+					params: {
+						correctas,
+						total: META_NIVEL,
+						dificultad,
+						tiempo: timer,
+					},
+				});
+			}, 1000);
+		},
+		[correctas, timer, dificultad, completarNivel]
+	);
 
-	const paisActual = paises[indice];
+	// Tiempo agotado = respuesta incorrecta automática
+	useEffect(() => {
+		if (tiempoAgotado && !finalizadoRef.current) {
+			finalizarPartida('__timeout__');
+		}
+	}, [tiempoAgotado, finalizarPartida]);
 
-	const animarContador = () => {
-		contadorScale.setValue(1.2);
+	// Alcanzó la meta: nivel superado
+	const superarNivel = () => {
+		if (finalizadoRef.current) return;
+		finalizadoRef.current = true;
+		if (timerRef.current) clearInterval(timerRef.current);
+		completarNivel(dificultad, META_NIVEL, META_NIVEL);
+		router.replace({
+			pathname: '/niveles/resultado',
+			params: {
+				correctas: META_NIVEL,
+				total: META_NIVEL,
+				dificultad,
+				tiempo: timer,
+			},
+		});
+	};
+
+	const animarBoton = () => {
+		contadorScale.setValue(1.15);
 		Animated.spring(contadorScale, {
 			toValue: 1,
 			friction: 4,
@@ -125,47 +197,36 @@ export default function NivelPage() {
 		}).start();
 	};
 
-	const handleSeleccionar = (nombre: string) => {
-		if (seleccionado) return;
-		if (timerRef.current) clearInterval(timerRef.current);
-		setSeleccionado(nombre);
-		if (nombre === paisActual?.nombre) {
-			setCorrectas(c => c + 1);
-		} else {
-			setErrores(e => e + 1);
-		}
-		animarContador();
+	const siguientePregunta = (poolActual: Pais[], actual: Pais) => {
+		const nueva = shuffle(
+			poolActual.filter(p => p.nombre !== actual.nombre)
+		)[0];
+		setPregunta(nueva);
+		setOpciones(getOpciones(poolActual, nueva, dificultad));
+		setSeleccionado(null);
 	};
 
-	const handleSiguiente = useCallback(() => {
-		if (indice + 1 >= TOTAL_PREGUNTAS) {
-			completarNivel(dificultad, correctas, TOTAL_PREGUNTAS);
-			router.replace({
-				pathname: '/niveles/resultado',
-				params: {
-					correctas,
-					total: TOTAL_PREGUNTAS,
-					dificultad,
-				},
-			});
-			return;
+	const handleSeleccionar = (nombre: string) => {
+		if (seleccionado || !pregunta) return;
+		setSeleccionado(nombre);
+		const esCorrecta = nombre === pregunta.nombre;
+
+		if (esCorrecta) {
+			const nuevasCorrectas = correctas + 1;
+			setCorrectas(nuevasCorrectas);
+			animarBoton();
+			// Pausa breve para ver el verde y pasa a la siguiente
+			setTimeout(() => {
+				if (nuevasCorrectas >= META_NIVEL) {
+					superarNivel();
+					return;
+				}
+				siguientePregunta(pool, pregunta);
+			}, 600);
+		} else {
+			// Falla → la partida termina
+			finalizarPartida(nombre);
 		}
-		const nuevoIndice = indice + 1;
-		setIndice(nuevoIndice);
-		setSeleccionado(null);
-		setOpciones(getOpciones(pool, paises[nuevoIndice], dificultad));
-	}, [indice, paises, pool, correctas, dificultad]);
-
-	const progreso = (indice / TOTAL_PREGUNTAS) * 100;
-
-	const getOpcionClases = (opcion: Pais) => {
-		const esCorrecta = opcion.nombre === paisActual?.nombre;
-		const esSeleccionada = opcion.nombre === seleccionado;
-		if (seleccionado && esCorrecta)
-			return 'bg-green-500/20 border-green-500';
-		if (seleccionado && esSeleccionada)
-			return 'bg-red-500/20 border-red-500';
-		return 'bg-card border-border';
 	};
 
 	// Color del timer según tiempo restante
@@ -177,12 +238,15 @@ export default function NivelPage() {
 				? '#f97316'
 				: '#a1ec3c';
 
-	const dificultadLabel: Record<number, string> = {
-		1: 'Novato',
-		2: 'Intermedio',
-		3: 'Avanzado',
-		4: 'Experto',
-		5: 'Leyenda',
+	// Colores dinámicos de opciones
+	const getOpcionClases = (opcion: Pais) => {
+		const esCorrecta = opcion.nombre === pregunta?.nombre;
+		const esSeleccionada = opcion.nombre === seleccionado;
+		if (seleccionado && esCorrecta)
+			return 'bg-green-500/20 border-green-500';
+		if (seleccionado && esSeleccionada)
+			return 'bg-red-500/20 border-red-500';
+		return 'bg-card border-border';
 	};
 
 	return (
@@ -190,7 +254,7 @@ export default function NivelPage() {
 			{/* Header */}
 			<View className="flex-row justify-between items-center p-5">
 				<TouchableOpacity
-					className="bg-card w-ancho h-alto justify-center items-center rounded-rounded2"
+					className="card w-ancho h-alto justify-center items-center"
 					onPress={() => {
 						if (timerRef.current) clearInterval(timerRef.current);
 						router.back();
@@ -203,21 +267,16 @@ export default function NivelPage() {
 					/>
 				</TouchableOpacity>
 
-				{/* Barra de progreso */}
-				<View className="flex-1 mx-4 h-2 bg-border rounded-full overflow-hidden">
-					<View
-						style={{ width: `${progreso}%` }}
-						className="h-full bg-color rounded-full"
-					/>
-				</View>
-
 				{/* Timer */}
 				<View className="flex-row gap-1 bg-card border border-border px-4 py-3 rounded-full items-center">
-					<Clock size={18} color={timerColor} />
-					<Texto className="text-h4" style={{ color: timerColor }}>
-						{conTimer
-							? `${tiempoRestante}s`
-							: `${indice + 1}/${TOTAL_PREGUNTAS}`}
+					<Clock size={18} color={conTimer ? timerColor : 'white'} />
+					<Texto
+						className={
+							conTimer ? 'text-h4' : 'text-primario text-h4'
+						}
+						style={conTimer ? { color: timerColor } : undefined}
+					>
+						{conTimer ? `${tiempoRestante}s` : formatTime(timer)}
 					</Texto>
 				</View>
 			</View>
@@ -226,8 +285,7 @@ export default function NivelPage() {
 				{/* Pregunta */}
 				<View>
 					<Texto className="text-color text-h4">
-						{dificultadLabel[dificultad]} — Pregunta{' '}
-						{String(indice + 1).padStart(2, '0')}/{TOTAL_PREGUNTAS}
+						{dificultadLabel[dificultad]}
 					</Texto>
 					<Texto className="text-primario text-h1 font-pixel uppercase">
 						¿De qué país es esta bandera?
@@ -236,11 +294,11 @@ export default function NivelPage() {
 
 				{/* Bandera */}
 				<View className="card items-center justify-center p-4">
-					{cargando || !paisActual ? (
+					{cargando || !pregunta ? (
 						<ActivityIndicator size="large" color="#a1ec3c" />
 					) : (
 						<Image
-							source={paisActual.bandera}
+							source={pregunta.bandera}
 							className="w-full rounded-rounded"
 							resizeMode="cover"
 						/>
@@ -250,14 +308,14 @@ export default function NivelPage() {
 				{/* Opciones */}
 				<View className="flex-row flex-wrap gap-3 justify-between">
 					{opciones.map(opcion => {
-						const esCorrecta = opcion.nombre === paisActual?.nombre;
+						const esCorrecta = opcion.nombre === pregunta?.nombre;
 						const esSeleccionada = opcion.nombre === seleccionado;
 						return (
 							<TouchableOpacity
 								key={opcion.nombre}
 								className={`border rounded-rounded2 w-[48%] h-28 items-center justify-center
-									${getOpcionClases(opcion)}
-									${seleccionado && !esCorrecta && !esSeleccionada ? 'opacity-40' : ''}`}
+                  ${getOpcionClases(opcion)}
+                  ${seleccionado && !esCorrecta && !esSeleccionada ? 'opacity-40' : ''}`}
 								onPress={() => handleSeleccionar(opcion.nombre)}
 								disabled={!!seleccionado}
 							>
@@ -269,38 +327,20 @@ export default function NivelPage() {
 					})}
 				</View>
 
-				{/* Contador correctas / errores */}
+				{/* Puntaje */}
 				<Animated.View
 					style={{ transform: [{ scale: contadorScale }] }}
 					className="self-center"
 				>
-					<View className="bg-card border border-border px-7 py-3 rounded-rounded2 flex-row items-center gap-5">
-						<Texto className="text-color text-h3 font-pixel">
-							x{correctas}
+					<View className="bg-card border border-border px-8 py-3 rounded-rounded2 flex-row items-center gap-3">
+						<Texto className="text-segundario text-h4">
+							Puntaje
 						</Texto>
-						<View className="w-px h-6 bg-border" />
-						<Texto className="text-red-500 text-h3 font-pixel">
-							x{errores}
+						<Texto className="text-color text-h2 font-pixel">
+							{correctas}
 						</Texto>
 					</View>
 				</Animated.View>
-
-				{/* Botón siguiente */}
-				<TouchableOpacity
-					className={`rounded-rounded2 flex-row gap-4 py-5 justify-center items-center ${seleccionado ? 'bg-color' : 'bg-card opacity-40'}`}
-					onPress={seleccionado ? handleSiguiente : undefined}
-					disabled={!seleccionado}
-				>
-					<Texto
-						className={`text-h2 font-pixel ${seleccionado ? 'text-fondo' : 'text-primario'}`}
-					>
-						SIGUIENTE
-					</Texto>
-					<ArrowRight
-						size={28}
-						color={seleccionado ? '#100e14' : 'white'}
-					/>
-				</TouchableOpacity>
 			</View>
 		</View>
 	);

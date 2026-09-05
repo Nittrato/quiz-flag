@@ -32,7 +32,7 @@ export default function RootLayout() {
 			<SafeAreaProvider
 				style={{
 					flex: 1,
-					backgroundColor: '#100e14',
+					backgroundColor: '#14101A',
 					paddingTop: Constants.statusBarHeight,
 				}}
 			>
@@ -40,7 +40,7 @@ export default function RootLayout() {
 				<Stack
 					screenOptions={{
 						headerShown: false,
-						contentStyle: { backgroundColor: '#100e14' },
+						contentStyle: { backgroundColor: '#14101A' },
 						animation: 'fade_from_bottom',
 					}}
 				/>

@@ -11,9 +11,9 @@ module.exports = {
 		extend: {
 			colors: {
 				/* Colores de fondo */
-				fondo: '#100e14',
-				card: '#19151f',
-				border: '#27222e',
+				fondo: '#131117',
+				card: '#1B1623',
+				border: '#282231',
 				/* Colores de botones y textos */
 				color: '#a1ec3c',
 				primario: '#FFFFFF',

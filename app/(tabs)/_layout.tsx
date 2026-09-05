@@ -7,7 +7,7 @@ export default function TabsLayout() {
 				headerShown: false,
 				tabBarStyle: { display: 'none' },
 				animation: 'shift',
-				sceneStyle: { backgroundColor: '#100e14' },
+				sceneStyle: { backgroundColor: '#14101A' },
 			}}
 		>
 			<Tabs.Screen
